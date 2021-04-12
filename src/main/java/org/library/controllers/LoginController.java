@@ -57,6 +57,7 @@ public class LoginController {
             pstm.setString(1, usernameTextField.getText());
 
             ResultSet queryResult = pstm.executeQuery();
+            queryResult.next();
 
             boolean correctPassword = checkPass(passwordTextField.getText(), queryResult.getString("password"));
 
