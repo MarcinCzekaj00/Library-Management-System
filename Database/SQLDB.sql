@@ -30,7 +30,7 @@ CREATE TABLE `books` (
   `release_date` date NOT NULL,
   PRIMARY KEY (`books_id`),
   UNIQUE KEY `books_id_UNIQUE` (`books_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +92,7 @@ CREATE TABLE `readers` (
 
 LOCK TABLES `readers` WRITE;
 /*!40000 ALTER TABLE `readers` DISABLE KEYS */;
-INSERT INTO `readers` VALUES (1,'Aubrey','Dawson','1992-04-30'),(2,'Virginia','Bird','1992-08-06'),(3,'Simona','Titterington','1997-11-05'),(4,'Humbert','Smart','1990-02-07'),(5,'Wren','Fennimore','1991-07-10'),(6,'Helen','Howard','1994-04-13'),(7,'Cole','Cummings','1999-04-08'),(8,'Ronald','Jenkins','1995-04-07'),(9,'Alison','Snyder','2002-08-01');
+INSERT INTO `readers` VALUES (1,'Aubrey','Dawson','1992-04-30'),(2,'Virginia','Bird','1992-08-06'),(3,'Simona','Titterington','1997-11-05'),(4,'Humbert','Smart','1990-02-07'),(5,'Wren','Fennimore','1991-07-10'),(6,'Helen','Howard','1994-04-13'),(7,'Cole','Cummings','1999-04-08'),(8,'Ronald','Jenkins','1994-04-08'),(9,'Alison','Snyder','2002-08-01'),(10,'John','Mysthic','2014-04-11');
 /*!40000 ALTER TABLE `readers` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -111,7 +111,7 @@ CREATE TABLE `rentals` (
   PRIMARY KEY (`rental_id`),
   UNIQUE KEY `rental_id_UNIQUE` (`rental_id`),
   UNIQUE KEY `book_id_UNIQUE` (`book_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -120,7 +120,7 @@ CREATE TABLE `rentals` (
 
 LOCK TABLES `rentals` WRITE;
 /*!40000 ALTER TABLE `rentals` DISABLE KEYS */;
-INSERT INTO `rentals` VALUES (1,1,4,'2021-04-15'),(2,2,2,'2021-04-21'),(3,3,1,'2021-04-29');
+INSERT INTO `rentals` VALUES (1,1,1,'2021-04-13'),(2,2,2,'2021-03-30'),(3,3,3,'2021-03-29'),(4,4,2,'2021-03-30');
 /*!40000 ALTER TABLE `rentals` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -134,7 +134,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `users_id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(45) NOT NULL,
-  `password` varchar(45) NOT NULL,
+  `password` varchar(255) NOT NULL,
   PRIMARY KEY (`users_id`),
   UNIQUE KEY `idusers_UNIQUE` (`users_id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
@@ -147,7 +147,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'login','password');
+INSERT INTO `users` VALUES (1,'login','$2a$10$9NE0B/Mhdz639bqx1MKjX.2on230fmMjzfFMBGl9MBmT4BqINDNO2');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -160,4 +160,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-04-09 23:41:15
+-- Dump completed on 2021-04-12 16:30:59
