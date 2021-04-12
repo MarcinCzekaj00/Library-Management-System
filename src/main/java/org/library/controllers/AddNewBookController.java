@@ -1,22 +1,21 @@
-package controllers;
+package org.library.controllers;
 
-import DB.CategoriesFromDB;
-import DB.DBConnection;
-import data.User;
+import org.library.dataFromDB.CategoriesFromDB;
+import org.library.DBConnect.DBConnection;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.NextID;
-import messages.SuccessMessage;
+import org.library.messages.NextID;
 import org.library.*;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ResourceBundle;
 
     public class AddNewBookController implements Initializable {
@@ -40,7 +39,7 @@ import java.util.ResourceBundle;
 
             usernameLabel.setText(User.getUsername());
 
-            ClearMessage.clear(addBookMessage);
+            MessagesHelper.getMessage(addBookMessage,"", "RED");
             clearAddNewBookFields();
             nextBookID();
 
@@ -82,24 +81,26 @@ import java.util.ResourceBundle;
         @FXML
         private void addBookAcceptButtonOnAction() {
 
-            String query = "INSERT INTO books (books_id,title,category,author,release_date) values (" + NextID.getNextID("SELECT max(books_id) FROM books")+
-                                                                                            ",'" + addBookTitle.getText() +
-                                                                                            "','" + addBookCategory.getSelectionModel().getSelectedItem() +
-                                                                                            "','" + addBookAuthor.getText() +
-                                                                                            "','" + addBookReleaseDate.getValue() +
-                                                                                            "');";
+            String query = QueryHelper.getAddBook();
+
             DBConnection connect = new DBConnection();
 
             try (Connection connectDB = connect.getConnection()) {
 
-                Statement stm = connectDB.createStatement();
-                stm.executeUpdate(query);
-                SuccessMessage.getSuccessMessage(addBookMessage);
+                PreparedStatement pstm = connectDB.prepareStatement(query);
+                pstm.setString(1, addBookTitle.getText());
+                pstm.setString(2, addBookCategory.getValue());
+                pstm.setString(3, addBookAuthor.getText());
+                pstm.setObject(4, addBookReleaseDate.getValue());
+
+                pstm.executeUpdate();
+
+                MessagesHelper.getMessage(addBookMessage,"Success!", "GREEN");
                 nextBookID();
                 clearAddNewBookFields();
 
             } catch (SQLException e) {
-                BadValuesMessage.getBadValuesMessage(addBookMessage);
+                MessagesHelper.getMessage(addBookMessage,"Bad values!", "RED");
                 e.printStackTrace();
             }
         }
@@ -108,7 +109,7 @@ import java.util.ResourceBundle;
 
 
         private void nextBookID() {
-            String query = "SELECT max(books_id) FROM books";
+            String query = QueryHelper.getMaxBooksID();
             nextBookID.setText(String.valueOf(NextID.getNextID(query)));
 
         }

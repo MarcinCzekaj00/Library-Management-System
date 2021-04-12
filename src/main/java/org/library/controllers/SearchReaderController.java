@@ -1,8 +1,8 @@
-package controllers;
+package org.library.controllers;
 
-import DB.DBConnection;
-import DB.ReadersDataFromDB;
-import data.ReaderData;
+import org.library.DBConnect.DBConnection;
+import org.library.dataFromDB.ReadersDataFromDB;
+import org.library.data.ReaderData;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -10,11 +10,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.SuccessMessage;
 import org.library.App;
-import data.User;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 
 import java.io.IOException;
 import java.net.URL;
@@ -60,7 +59,7 @@ public class SearchReaderController implements Initializable {
         updateTable();
         searchUser();
         clearTextFields();
-        ClearMessage.clear(searchReaderMessage);
+        MessagesHelper.getMessage(searchReaderMessage,"","GREEN");
     }
 
     @FXML
@@ -112,20 +111,25 @@ public class SearchReaderController implements Initializable {
             String value3 = txt_surname.getText();
             LocalDate value4 = txt_date.getValue();
 
-            String query = "update readers set readers_id="+value1+",name= '"+value2+"',surname= '"+
-                    value3+"',date_of_birth= '"+value4+"' where readers_id="+value1+";";
+            String query = QueryHelper.getUpdateReaders();
 
-            Statement stm = connectDB.createStatement();
-            stm.executeUpdate(query);
+            PreparedStatement pstm = connectDB.prepareStatement(query);
+            pstm.setString(1, value1);
+            pstm.setString(2, value2);
+            pstm.setString(3, value3);
+            pstm.setObject(4, value4);
+            pstm.setString(5, value1);
 
-            SuccessMessage.getSuccessMessage(searchReaderMessage);
+            pstm.executeUpdate();
+
+            MessagesHelper.getMessage(searchReaderMessage,"Success!","GREEN");
             updateTable();
             searchUser();
             clearTextFields();
 
         } catch (Exception e) {
             e.printStackTrace();
-            BadValuesMessage.getBadValuesMessage(searchReaderMessage);
+            MessagesHelper.getMessage(searchReaderMessage,"Bad values!","RED");
         }
     }
 
@@ -133,7 +137,7 @@ public class SearchReaderController implements Initializable {
     private void deleteReaderOnAction() {
 
         DBConnection connect = new DBConnection();
-        String sql = "delete from readers where readers_id = ?";
+        String sql = QueryHelper.getDeleteFromReadersWhereID();
 
         try (Connection connectDB = connect.getConnection()){
 
@@ -141,7 +145,7 @@ public class SearchReaderController implements Initializable {
             pstm.setString(1, txt_id.getText());
 
             if(pstm.executeUpdate()>0) {
-                SuccessMessage.getSuccessMessage(searchReaderMessage);
+                MessagesHelper.getMessage(searchReaderMessage,"Success!","GREEN");
                 updateTable();
                 searchUser();
                 clearTextFields();
@@ -149,7 +153,7 @@ public class SearchReaderController implements Initializable {
 
         } catch (Exception e) {
             e.printStackTrace();
-             BadValuesMessage.getBadValuesMessage(searchReaderMessage);
+            MessagesHelper.getMessage(searchReaderMessage,"Bad values!","RED");;
         }
     }
 

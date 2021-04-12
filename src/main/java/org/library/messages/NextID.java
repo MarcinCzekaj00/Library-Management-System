@@ -1,6 +1,6 @@
-package messages;
+package org.library.messages;
 
-import DB.DBConnection;
+import org.library.DBConnect.DBConnection;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

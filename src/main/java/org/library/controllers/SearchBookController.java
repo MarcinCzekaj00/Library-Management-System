@@ -1,9 +1,9 @@
-package controllers;
+package org.library.controllers;
 
-import DB.BookDataFromDB;
-import DB.CategoriesFromDB;
-import DB.DBConnection;
-import data.BookData;
+import org.library.dataFromDB.BookDataFromDB;
+import org.library.dataFromDB.CategoriesFromDB;
+import org.library.DBConnect.DBConnection;
+import org.library.data.BookData;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -11,11 +11,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.SuccessMessage;
 import org.library.App;
-import data.User;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 
 import java.io.IOException;
 import java.net.URL;
@@ -64,7 +63,7 @@ public class SearchBookController implements Initializable {
         updateTable();
         searchBook();
         clearTextFields();
-        ClearMessage.clear(searchBookMessage);
+        MessagesHelper.getMessage(searchBookMessage,"","RED");
 
         CategoriesFromDB.getCategoriesFromDB(txt_category);
     }
@@ -119,20 +118,27 @@ public class SearchBookController implements Initializable {
             String value4 = txt_author.getText();
             LocalDate value5 = txt_date.getValue();
 
-            String query = "update books set books_id="+value1+",title= '"+value2+"',category= '"+
-                    value3+"',author= '"+value4+"',release_date= '"+value5+"' where books_id="+value1+";";
+            String query = QueryHelper.getUpdateBooks();
 
-            Statement stm = connectDB.createStatement();
-            stm.executeUpdate(query);
+            PreparedStatement pstm = connectDB.prepareStatement(query);
+            pstm.setString(1, value1);
+            pstm.setString(2, value2);
+            pstm.setString(3, value3);
+            pstm.setString(4, value4);
+            pstm.setObject(5, value5);
+            pstm.setString(6, value1);
 
-            SuccessMessage.getSuccessMessage(searchBookMessage);
+            pstm.executeUpdate();
+
+
+            MessagesHelper.getMessage(searchBookMessage,"Success!","GREEN");
             updateTable();
             searchBook();
             clearTextFields();
 
         } catch (Exception e) {
             e.printStackTrace();
-            BadValuesMessage.getBadValuesMessage(searchBookMessage);
+            MessagesHelper.getMessage(searchBookMessage,"Bad values!","RED");
         }
     }
 
@@ -140,7 +146,7 @@ public class SearchBookController implements Initializable {
     private void deleteBookOnAction() {
 
         DBConnection connect = new DBConnection();
-        String sql = "delete from books where books_id = ?";
+        String sql = QueryHelper.getDeleteFromBooksWhereID();
 
         try (Connection connectDB = connect.getConnection()){
 
@@ -148,7 +154,7 @@ public class SearchBookController implements Initializable {
             pstm.setString(1, txt_id.getText());
 
             if(pstm.executeUpdate()>0) {
-                SuccessMessage.getSuccessMessage(searchBookMessage);
+                MessagesHelper.getMessage(searchBookMessage,"Success!","GREEN");
                 updateTable();
                 searchBook();
                 clearTextFields();
@@ -156,7 +162,7 @@ public class SearchBookController implements Initializable {
 
         } catch (Exception e) {
             e.printStackTrace();
-            BadValuesMessage.getBadValuesMessage(searchBookMessage);
+            MessagesHelper.getMessage(searchBookMessage,"Bad values!","RED");
         }
     }
 

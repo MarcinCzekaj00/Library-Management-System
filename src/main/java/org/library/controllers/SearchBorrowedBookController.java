@@ -1,9 +1,11 @@
-package controllers;
+package org.library.controllers;
 
-import DB.BorrowedBookDataFromDB;
-import DB.DBConnection;
-import data.BorrowedBookData;
-import data.User;
+import org.library.dataFromDB.BorrowedBookDataFromDB;
+import org.library.DBConnect.DBConnection;
+import org.library.data.BorrowedBookData;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -15,9 +17,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.SuccessMessage;
 import org.library.App;
 
 import java.io.IOException;
@@ -64,7 +63,7 @@ public class SearchBorrowedBookController implements Initializable {
         updateTable();
         searchBorrowedBook();
         clearTextFields();
-        ClearMessage.clear(searchBorrowedBookMessage);
+        MessagesHelper.getMessage(searchBorrowedBookMessage,"","GREEN");
 
     }
 
@@ -114,29 +113,34 @@ public class SearchBorrowedBookController implements Initializable {
         try (Connection connectDB = connect.getConnection()){
 
             if(ifBookNotExist(txt_book_id)) {
-                throw new Exception("Book with this id does not exist");
+                throw new IndexOutOfBoundsException("Book with this id does not exist");
             } else if(ifReaderNotExist(txt_reader_id)) {
-                throw new Exception("Reader with this id does not exist");
+                throw new IndexOutOfBoundsException("Reader with this id does not exist");
             }
-            String value = txt_rental_id.getText();
-            String value1 = txt_book_id.getText();
-            String value2 = txt_reader_id.getText();
-            LocalDate value3 = txt_date.getValue();
 
-            String query = "update rentals set book_id="+value1+",reader_id= '"+value2
-                            +"',due_date= '"+value3+"' where rental_id="+value+";";
+            String value = txt_book_id.getText();
+            String value1 = txt_reader_id.getText();
+            LocalDate value2 = txt_date.getValue();
+            String value3 = txt_rental_id.getText();
 
-            Statement stm = connectDB.createStatement();
-            stm.executeUpdate(query);
+            String query = QueryHelper.getUpdateRentals();
 
-            SuccessMessage.getSuccessMessage(searchBorrowedBookMessage);
+            PreparedStatement pstm = connectDB.prepareStatement(query);
+            pstm.setString(1, value);
+            pstm.setString(2, value1);
+            pstm.setObject(3, value2);
+            pstm.setString(4, value3);
+
+            pstm.executeUpdate();
+
+            MessagesHelper.getMessage(searchBorrowedBookMessage,"Success!","GREEN");
             updateTable();
             searchBorrowedBook();
             clearTextFields();
 
         } catch (Exception e) {
             e.printStackTrace();
-            BadValuesMessage.getBadValuesMessage(searchBorrowedBookMessage);
+            MessagesHelper.getMessage(searchBorrowedBookMessage,"Bad values!","RED");
         }
     }
 
@@ -228,7 +232,7 @@ public class SearchBorrowedBookController implements Initializable {
 
         try (Connection connectDB = connect.getConnection()){
 
-            String query = "select * from books where books_id="+f.getText();
+            String query = QueryHelper.getSelectFromBooksWhereID() + f.getText();
             Statement stm = connectDB.createStatement();
             ResultSet rs = stm.executeQuery(query);
 
@@ -248,7 +252,7 @@ public class SearchBorrowedBookController implements Initializable {
 
         try (Connection connectDB = connect.getConnection()){
 
-            String query = "select * from readers where readers_id="+f.getText();
+            String query = QueryHelper.getSelectFromReadersWhereID() + f.getText();
             Statement stm = connectDB.createStatement();
             ResultSet rs = stm.executeQuery(query);
 

@@ -1,21 +1,18 @@
-package controllers;
+package org.library.controllers;
 
-import DB.DBConnection;
-import data.User;
+import org.library.DBConnect.DBConnection;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.NextID;
-import messages.SuccessMessage;
+import org.library.messages.NextID;
 import org.library.*;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ResourceBundle;
 
 public class AddReaderController implements Initializable {
@@ -36,7 +33,7 @@ public class AddReaderController implements Initializable {
 
         usernameLabel.setText(User.getUsername());
 
-        ClearMessage.clear(addReaderMessage);
+        MessagesHelper.getMessage(addReaderMessage,"","GREEN");
         clearAddNewReaderFields();
         nextReaderID();
 
@@ -77,25 +74,26 @@ public class AddReaderController implements Initializable {
     @FXML
     private void addReaderAcceptButtonOnAction() {
 
-        String query = "INSERT INTO readers (readers_id,name,surname,date_of_birth) values (" + NextID.getNextID("SELECT max(readers_id) FROM readers")+
-                                                                            ",'" + addReaderName.getText() +
-                                                                            "','" + addReaderSurname.getText() +
-                                                                            "','" + addReaderDateOfBirth.getValue() + "');";
+        String query = QueryHelper.getAddReader();
 
         DBConnection connect = new DBConnection();
 
         try (Connection connectDB = connect.getConnection()) {
 
-            Statement stm = connectDB.createStatement();
-            stm.executeUpdate(query);
+            PreparedStatement pstm = connectDB.prepareStatement(query);
+            pstm.setString(1, addReaderName.getText());
+            pstm.setString(2, addReaderSurname.getText());
+            pstm.setObject(3, addReaderDateOfBirth.getValue());
 
-            SuccessMessage.getSuccessMessage(addReaderMessage);
+            pstm.executeUpdate();
+
+            MessagesHelper.getMessage(addReaderMessage,"Success!","GREEN");
 
             nextReaderID();
             clearAddNewReaderFields();
 
         } catch (SQLException e) {
-            BadValuesMessage.getBadValuesMessage(addReaderMessage);
+            MessagesHelper.getMessage(addReaderMessage,"Bad values!","RED");
             e.printStackTrace();
         }
     }
@@ -103,7 +101,7 @@ public class AddReaderController implements Initializable {
     //==============================================================================================================
 
     private void nextReaderID() {
-        String query = "SELECT max(readers_id) FROM readers";
+        String query = QueryHelper.getMaxReadersID();
         nextReaderID.setText(String.valueOf(NextID.getNextID(query)));
     }
 

@@ -1,16 +1,18 @@
-package controllers;
+package org.library.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.library.App;
-import DB.DBConnection;
-import data.User;
+import org.library.DBConnect.DBConnection;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 import java.sql.*;
-
 
 public class LoginController {
 
@@ -32,8 +34,13 @@ public class LoginController {
         if (!usernameTextField.getText().isBlank() && !passwordTextField.getText().isBlank()) {
             checkLoginData();
         } else {
-            loginMessageLabel.setText("Enter username and password");
+            MessagesHelper.getMessage(loginMessageLabel,"Enter username and password!","RED");
         }
+    }
+
+    @FXML
+    public void changeLoginDataButtonOnAction() throws IOException{
+        App.setRoot("changeLoginData");
     }
 
     //==============================================================================================================
@@ -43,22 +50,33 @@ public class LoginController {
         DBConnection connect = new DBConnection();
 
         try (Connection connectDB = connect.getConnection()) {
-            String queryLogin = "SELECT count(1) FROM users WHERE username='" + usernameTextField.getText() + "' AND password ='" + passwordTextField.getText() + "';";
 
-            Statement stm = connectDB.createStatement();
-            ResultSet queryResult = stm.executeQuery(queryLogin);
+            String queryLogin = QueryHelper.getIfUserExist();
 
-            while (queryResult.next()) {
-                if (queryResult.getInt(1) == 1) {
+            PreparedStatement pstm = connectDB.prepareStatement(queryLogin);
+            pstm.setString(1, usernameTextField.getText());
+
+            ResultSet queryResult = pstm.executeQuery();
+
+            boolean correctPassword = checkPass(passwordTextField.getText(), queryResult.getString("password"));
+
+                if (correctPassword) {
                     setUserController();
                     switchToSecondary();
                 } else {
-                    loginMessageLabel.setText("Invalid login or password");
+                    MessagesHelper.getMessage(loginMessageLabel,"Invalid login or password!","RED");
                 }
-            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean checkPass(String plainPassword, String hashedPassword) {
+        if (BCrypt.checkpw(plainPassword, hashedPassword))
+            return true;
+        else
+            return false;
     }
 
     private void setUserController(){

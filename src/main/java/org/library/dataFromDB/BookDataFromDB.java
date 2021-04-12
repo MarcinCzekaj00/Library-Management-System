@@ -1,8 +1,10 @@
-package DB;
+package org.library.dataFromDB;
 
-import data.BookData;
+import org.library.DBConnect.DBConnection;
+import org.library.data.BookData;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.library.service.QueryHelper;
 
 import java.sql.*;
 
@@ -11,7 +13,7 @@ public class BookDataFromDB {
 
         DBConnection connect = new DBConnection();
         ObservableList<BookData> list = FXCollections.observableArrayList();
-        String query = "select * from books";
+        String query = QueryHelper.getSelectFromBooks();
 
         try(Connection connectDB = connect.getConnection()){
 

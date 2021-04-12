@@ -1,12 +1,12 @@
-package data;
+package org.library.data;
 
 import java.sql.Date;
 
 public class BookData {
 
-    int id;
-    String title,author,category;
-    Date release_date;
+    private int id;
+    private String title,author,category;
+    private Date release_date;
 
     public BookData(int id, String title, String category, String author, Date release_date) {
         this.id = id;

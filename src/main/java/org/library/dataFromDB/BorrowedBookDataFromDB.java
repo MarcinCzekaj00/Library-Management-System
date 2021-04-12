@@ -1,19 +1,22 @@
-package DB;
+package org.library.dataFromDB;
 
-import data.BorrowedBookData;
+import org.library.DBConnect.DBConnection;
+import org.library.data.BorrowedBookData;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.library.service.QueryHelper;
 
 import java.sql.*;
 
 public class BorrowedBookDataFromDB {
+
     public static ObservableList<BorrowedBookData> getDataBorrowedBook(){
 
         DBConnection connect = new DBConnection();
 
         ObservableList<BorrowedBookData> list = FXCollections.observableArrayList();
 
-        String query = "select * from rentals";
+        String query = QueryHelper.getSelectFromRentals();
 
         try(Connection connectDB = connect.getConnection()){
 
@@ -22,15 +25,16 @@ public class BorrowedBookDataFromDB {
 
             while (result.next()){
 
-                String query1 = "select title from books where books_id=" + result.getString("book_id");
+                String query1 =  QueryHelper.getSelectTitleWhereID() + result.getString("book_id");
+                String query2 = QueryHelper.getSelectNameReaderWhereID() + result.getString("reader_id");
+                String query3 = QueryHelper.getSelectSurnameReaderWhereID() + result.getString("reader_id");
+
                 Statement stm1 = connectDB.createStatement();
                 ResultSet result1 = stm1.executeQuery(query1);
 
-                String query2 = "select name from readers where readers_id=" + result.getString("reader_id");
                 Statement stm2 = connectDB.createStatement();
                 ResultSet result2 = stm2.executeQuery(query2);
 
-                String query3 = "select surname from readers where readers_id="+ result.getString("reader_id");
                 Statement stm3 = connectDB.createStatement();
                 ResultSet result3 = stm3.executeQuery(query3);
 

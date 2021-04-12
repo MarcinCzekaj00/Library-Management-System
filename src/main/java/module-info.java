@@ -4,11 +4,12 @@ module org.library {
     requires javafx.graphics;
     requires java.sql;
     requires mysql.connector.java;
+    requires jbcrypt;
 
     opens org.library to javafx.fxml;
     exports org.library;
-    opens controllers to javafx.fxml;
-    exports controllers;
-    opens data to javafx.fxml;
-    exports data;
+    opens org.library.controllers to javafx.fxml;
+    exports org.library.controllers;
+    opens org.library.data to javafx.fxml;
+    exports org.library.data;
 }

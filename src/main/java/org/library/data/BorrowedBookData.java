@@ -1,11 +1,11 @@
-package data;
+package org.library.data;
 
 import java.sql.Date;
 
 public class BorrowedBookData {
-    int rental_id,book_id,reader_id;
-    String title,name,surname;
-    Date due_date;
+    private int rental_id,book_id,reader_id;
+    private String title,name,surname;
+    private Date due_date;
 
     public BorrowedBookData(int rental_id,int book_id, String title, int reader_id, String name, String surname, Date due_date) {
         this.rental_id = rental_id;

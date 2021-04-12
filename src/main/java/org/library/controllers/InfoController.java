@@ -1,10 +1,10 @@
-package controllers;
+package org.library.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import org.library.App;
-import data.User;
+import org.library.userData.User;
 
 import java.io.IOException;
 import java.net.URL;

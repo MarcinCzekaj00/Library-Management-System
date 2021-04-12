@@ -1,6 +1,8 @@
-package DB;
+package org.library.dataFromDB;
 
 import javafx.scene.control.ChoiceBox;
+import org.library.DBConnect.DBConnection;
+import org.library.service.QueryHelper;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -10,9 +12,10 @@ import java.util.ArrayList;
 
 public class CategoriesFromDB {
 
-    public static void getCategoriesFromDB(ChoiceBox<String> addBookCategory){
 
-        String query = "SELECT * FROM categories";
+    public static void getCategoriesFromDB (ChoiceBox<String> addBookCategory) {
+
+        String query = QueryHelper.getSelectFromCategories();
 
         DBConnection connect = new DBConnection();
         ArrayList<String> categories = new ArrayList<>();

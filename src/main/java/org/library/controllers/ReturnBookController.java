@@ -1,21 +1,17 @@
-package controllers;
+package org.library.controllers;
 
-import DB.DBConnection;
-import data.User;
+import org.library.DBConnect.DBConnection;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.SuccessMessage;
 import org.library.*;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
@@ -36,7 +32,7 @@ public class ReturnBookController implements Initializable {
 
         usernameLabel.setText(User.getUsername());
 
-        ClearMessage.clear(returnBookMessage);
+        MessagesHelper.getMessage(returnBookMessage,"","RED");
         clearReturnBookFields();
     }
 
@@ -75,12 +71,8 @@ public class ReturnBookController implements Initializable {
     @FXML
     private void returnBookAcceptButtonOnAction() {
 
-        String query = "DELETE FROM rentals WHERE book_id=" + returnBookBookID.getText() +
-                                            " AND reader_id=" + returnBookReaderID.getText() + ";";
-
-        String queryDate = "select due_date from rentals where reader_id=" + returnBookReaderID.getText() +
-                                                         " AND book_id=" + returnBookBookID.getText() + ";";
-
+        String query = QueryHelper.getDeleteFromRentals();
+        String queryDate = QueryHelper.getDueDate();
 
         DBConnection connect = new DBConnection();
         try (Connection connectDB = connect.getConnection()) {
@@ -88,14 +80,17 @@ public class ReturnBookController implements Initializable {
             LocalDate today = LocalDate.now();
             String dueDateString = null;
 
-            Statement stm = connectDB.createStatement();
-            ResultSet result = stm.executeQuery(queryDate);
+            PreparedStatement pstm = connectDB.prepareStatement(queryDate);
+            pstm.setString(1, returnBookBookID.getText());
+            pstm.setString(2, returnBookReaderID.getText());
+
+            ResultSet result = pstm.executeQuery();
 
             if (result.next()) {
                 dueDateString = result.getString("due_date");
             }
             else {
-                BadValuesMessage.getBadValuesMessage(returnBookMessage);
+                MessagesHelper.getMessage(returnBookMessage,"Bad values!","RED");
             }
 
             LocalDate dueDate = LocalDate.parse(dueDateString);
@@ -108,14 +103,16 @@ public class ReturnBookController implements Initializable {
                 delayTime.setText("On Time!");
             }
 
-            Statement stm2 = connectDB.createStatement();
-            stm2.executeUpdate(query);
+            PreparedStatement pstm1 = connectDB.prepareStatement(query);
+            pstm1.setString(1, returnBookBookID.getText());
+            pstm1.setString(2, returnBookReaderID.getText());
+            pstm1.executeUpdate();
 
-            SuccessMessage.getSuccessMessage(returnBookMessage);
+            MessagesHelper.getMessage(returnBookMessage,"Success!","Green");
             clearReturnBookFields();
 
         } catch (SQLException e) {
-            BadValuesMessage.getBadValuesMessage(returnBookMessage);
+            MessagesHelper.getMessage(returnBookMessage,"Bad values!","RED");
             e.printStackTrace();
         }
     }

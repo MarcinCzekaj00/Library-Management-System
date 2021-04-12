@@ -1,4 +1,4 @@
-package data;
+package org.library.userData;
 
 public class User {
 

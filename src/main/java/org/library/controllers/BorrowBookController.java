@@ -1,18 +1,17 @@
-package controllers;
+package org.library.controllers;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
 
-import DB.DBConnection;
-import data.User;
+import org.library.DBConnect.DBConnection;
+import org.library.messages.MessagesHelper;
+import org.library.service.QueryHelper;
+import org.library.userData.User;
 import javafx.fxml.Initializable;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import messages.BadValuesMessage;
-import messages.ClearMessage;
-import messages.SuccessMessage;
 import org.library.*;
 
 public class BorrowBookController implements Initializable {
@@ -33,7 +32,7 @@ public class BorrowBookController implements Initializable {
 
         usernameLabel.setText(User.getUsername());
 
-        ClearMessage.clear(borrowBookMessage);
+        MessagesHelper.getMessage(borrowBookMessage,"","GREEN");
         clearBorrowBookFields();
     }
 
@@ -72,29 +71,34 @@ public class BorrowBookController implements Initializable {
     @FXML
     private void borrowBookAcceptButtonOnAction() {
 
-        String query = "INSERT INTO rentals (book_id,reader_id,due_date) values (" + borrowBookBookID.getText() +
-                                                                                ",'" + borrowBookReaderID.getText() +
-                                                                                "','" + borrowBookDueDate.getValue() +
-                                                                                "');";
+        String query = QueryHelper.getBorrowBook();
 
-        String test = "SELECT * FROM books,readers where books_id=" + borrowBookBookID.getText() +
-                                                   " AND readers_id=" + borrowBookReaderID.getText() + ";";
+        String test = QueryHelper.getIfBookExist();
 
         DBConnection connect = new DBConnection();
 
         try(Connection connectDB = connect.getConnection()){
 
-            Statement stm = connectDB.createStatement();
-            ResultSet result = stm.executeQuery(test);
+            PreparedStatement pstm = connectDB.prepareStatement(test);
+            pstm.setString(1, borrowBookBookID.getText());
+            pstm.setString(2, borrowBookReaderID.getText());
+
+            ResultSet result = pstm.executeQuery();
 
                 if (result.next()) {
-                    Statement stm2 = connectDB.createStatement();
-                    stm2.executeUpdate(query);
-                    SuccessMessage.getSuccessMessage(borrowBookMessage);
+                    PreparedStatement pstm1 = connectDB.prepareStatement(query);
+                    pstm1.setString(1, borrowBookBookID.getText());
+                    pstm1.setString(2, borrowBookReaderID.getText());
+                    pstm1.setObject(3, borrowBookDueDate.getValue());
+
+                    pstm1.executeUpdate();
+
+                    MessagesHelper.getMessage(borrowBookMessage,"Success!","GREEN");
                     clearBorrowBookFields();
                 }
+                else throw new SQLException();
         } catch (SQLException e) {
-            BadValuesMessage.getBadValuesMessage(borrowBookMessage);
+            MessagesHelper.getMessage(borrowBookMessage,"Bad values!","RED");
             e.printStackTrace();
         }
     }
